@@ -41,11 +41,13 @@ import {
   LabelTypeGuestAccess,
   LabelTypeUserAccess,
 } from "./contrib";
+import { overrideStore } from "react-overridable";
 
 const requestDetailsDiv = document.getElementById("request-detail");
 const request = JSON.parse(requestDetailsDiv.dataset.record);
 const defaultQueryParams = JSON.parse(requestDetailsDiv.dataset.defaultQueryConfig);
 const userAvatar = JSON.parse(requestDetailsDiv.dataset.userAvatar);
+const permissions = JSON.parse(requestDetailsDiv.dataset.permissions);
 
 const overriddenComponents = {
   "TimelineEvent.layout.unknown": TimelineUnknownEvent,
@@ -76,12 +78,17 @@ const overriddenComponents = {
   "RequestActionModal.title.decline": () => i18next.t("Decline request"),
 };
 
+for (const [key, value] of Object.entries(overriddenComponents)) {
+  overrideStore.add(key, value);
+}
+
 ReactDOM.render(
   <InvenioRequestsApp
     request={request}
     defaultQueryParams={defaultQueryParams}
-    overriddenCmps={overriddenComponents}
+    overriddenCmps={overrideStore.getAll()}
     userAvatar={userAvatar}
+    permissions={permissions}
   />,
   requestDetailsDiv
 );
